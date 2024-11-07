@@ -7,7 +7,21 @@ function App() {
   const [todo, setTodo] = useState([]);
   const [ currentTodo, setCurrentTodo ] = useState(null);
   const [time, setTime] = useState(0);
-  const [isTimer, setIsTimer] = useState(false)
+  const [isTimer, setIsTimer] = useState(false);
+
+  useEffect(() => {
+    if (currentTodo) {
+      fetch(`http://localhost:3000/todo/${currentTodo}`, {
+        method: "PATCH",
+        body: JSON.stringify({ 
+          time: todo.find((el) => el.id === currentTodo).time + 1,
+        }),
+      }).then(res => res.json())
+        .then(res => setTodo(prev => prev.map(
+          el => el.id === currentTodo ? res : el
+        )));
+    }
+  }, [time]);
 
   useEffect(() => {
     setTime(0);
@@ -19,6 +33,8 @@ function App() {
 
   return (
     <>
+    <h1>TODO LIST</h1>
+      <Clock />
       <Advice />
       <button onClick={() => setIsTimer(prev => !prev)}>
         {isTimer ? '스톱워치로 변경' : '타이머로 변경'}
@@ -146,8 +162,8 @@ const Advice = () => {
     <>
       {!isLoading && (
         <>
-          <div>{data.message}</div>
-          <div>-{data.author}-</div>
+          <div className='advice'>{data.message}</div>
+          <div className='advice'>-{data.author}-</div>
         </>
       )}
     </>
@@ -163,7 +179,7 @@ const Clock = () => {
     }, 1000)
   }, [])
 
-  return <div>
+  return <div className='clock'>
     {time.toLocaleTimeString()}
   </div>;
 };
